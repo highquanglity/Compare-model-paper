@@ -1,4 +1,23 @@
+## Kiến trúc của network
+
+Network được cấu tạo bởi nhiều convolution layer, các residual block có cấu tạo như trong hình xxx, khối SPP và khối yolo. Do các số lượng các conv layer là lớn và mỗi layer có những đặc trung riêng về kích thước, số lượng filter, hàm activate, batch normalize,... Nên bài báo chỉ nêu ra kiến trúc tổng quan của model. Những thay đổi so với model ban đầu sẽ được nêu rõ
+
+Gọi kiến trúc mô hình bên dưới là block A
+
+![](./block_a.png)
+
+
+Block A là kiến trúc bắt đầu bằng một conv layer theo đó là các residual block (có thể có nhiều hơn 2) gồm 3 lớp conv layer, theo sau là 1 lớp dropout và kết thúc là 1 lớp shortcut
+
+Cấu trúc SPP:
+
+![](./spp.png)
+
 ## Model 3A so với origin
+
+Ảnh kiến trúc tổng quan model 3A:
+
+![](./model_v3_a.png)
 
 Với mục tiêu là tối ưu hóa giúp cho model được nhẹ hơn đồng thời phải tăng được độ chính xác của model ban đầu, vì vậy qua quá trình nghiên cứu phát triển, nhóm đã thực hiện các bước modified model ban đầu như sau để theo dỗi:
 
@@ -8,6 +27,15 @@ Với mục tiêu là tối ưu hóa giúp cho model được nhẹ hơn đồng
 
 ## Model 3B so với 3A
 
+Do kiến trúc tổng quan phần đầu của model 3B tương tự với model 3A nên ta gọi phần đó là block B
+
+![](./block_b.png)
+
+Kiến trúc model 3B
+
+
+![](./model_v3_b_short.png)
+
 Sau khi thực hiện modified được model 3A, qua đánh giá được kết quả model đã nhẹ đi so với model gốc, tuy nhiên loss lại tăng lên khá nhiều, chính vì vậy nhóm tiếp tục modified model 3A thành model 3B bằng cách:
 
 - Giảm số lượng filters đi 1 nửa tại các convolutional layer tại các vị trí 1, 2, 4, 5 giữa các lớp shortcut và dropout. Số lượng group filter của các layer trên cũng được thay đổi bằng với số filter. Restore lại các lớp convolutional layer sau SPP architecture của model ban đầu đã bị bỏ khi modified model 3A. Thay đổi mask của lớp yolo thứ nhất từ 4, 5 thành 2, 3.
@@ -15,6 +43,8 @@ Sau khi thực hiện modified được model 3A, qua đánh giá được kết
 Mục đích của việc modifi này là để tiếp tục giảm model size và cố lấy lại hiệu quả của model như model ban đầu. Kết quả là model đã giảm rất nhiều đồng thời loss vs mAP đã xấp xỉ model ban đầu
 
 ## Model cuối cùng so với 3B
+
+![](./model_v4.png)
 
 Sau khi đã đạt được mục đích với model size, nhóm tiếp tục thực hiện mod model để có thể đạt được hiệu quả và độ chính xác cao hơn cho model, vì vậy nhóm đã thêm một cấu trúc khối gồm yolo, route, upsample layer giống cấu trúc của khối trong model vào vị trí giữa khối yolo thứ nhất và thứ hai với số lượng filters và group filter của các convolutional layer giảm đi một nửa so với các layer thuộc khối yolo thứ nhất (cụ thể là giảm từ 48 còn 24).
 
